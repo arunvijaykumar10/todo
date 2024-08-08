@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Todo from "./components/todo/Todo";
-//import Todos from "./components/todo/Todored";
+
 
 function App() {
   return (
