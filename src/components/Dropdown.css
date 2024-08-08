@@ -1,0 +1,37 @@
+.option {
+    padding-left: 10px;
+  }
+  
+  .header {
+    border: groove;
+    font-size: 15px;
+    padding: 10px 25px;
+    text-align: left;
+    line-height: 1em;
+  }
+  
+  .option:hover {
+    background-color: rgb(160, 157, 157);
+  }
+  
+  .body {
+    border: groove;
+    font-size: 15px;
+    box-shadow: rgba(0, 0, 0, 0.2);
+    text-align: left;
+    box-sizing: border-box;
+    line-height: 30px;
+    overflow-y:scroll;
+  }
+  
+  .dropdown {
+    color: rgb(7, 7, 7);
+    position: relative;
+    font-size: 15px;
+    display: inline-block;
+    padding: 10px 25px;
+    cursor: pointer;
+    text-align: left;
+    font-family: Lato, "Helvetica Neue", Arial, Helvetica, sans-serif;
+  }
+  
