@@ -61,7 +61,7 @@ const reducer = (state: State, action: Action): State => {
         ...state,filter:action.payload,
       };
       case "clear-completed":
-        return{...state,tasks:state.tasks.filter((task)=>task.completed)
+        return{...state,tasks:state.tasks.filter((task)=>!task.completed)
 
         };
    

@@ -105,14 +105,7 @@
   border-color: white;
 }
 
-/* Todo.css */
-.background{
-  background-image: url('/home/ajith/todo/src/components/todo/todoimg1.jpg'); 
-  background-size: cover; 
-  background-position: center; 
-  background-repeat:no-repeat; 
-  min-height: 80vh; 
-  padding: 20px; }
+
 
 
 
