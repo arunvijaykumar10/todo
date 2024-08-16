@@ -1,97 +1,82 @@
-// import React, {useState } from "react";
-// import "./Todo.css";
+import React from "react";
+import "./Todo.css";
+import { useTodoContext } from "./TodoProvider";
+import _ from "lodash";
 
-// interface Task {
-//   task: string;
-//   completed: boolean;
-// }
+function TodoHeader() {
+  const { taskData, newTask, setInput, selectAll } = useTodoContext();
 
-// function Todo() {
-//   const [input, setInput] = useState("");
-//   const [tasks, setTasks] = useState<Task[]>([]);
-//   const [filtered,setFiltered] = useState("All");
+  return (
+    <div>
+      <button type="button" className="btn select" onClick={selectAll}>
+        {_.every(taskData.tasks, "completed") ? "Deselect All" : "Select All"}
+      </button>
+      <input
+        type="text"
+        value={taskData.input}
+        onChange={setInput}
+        onKeyDown={newTask}
+        placeholder="What needs to be done?"
+        className="head"
+      />
+    </div>
+  );
+}
 
-//   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-//     setInput(event.target.value);
-//   };
+function TodoList() {
+  const { taskData, toggleTask, deleteTask } = useTodoContext();
 
-//   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
-//     if (event.key === "Enter") {
-//       const trimmedInput = input.trim();
-//       if (trimmedInput !== "") {
-//         setTasks([...tasks, { task: trimmedInput, completed: false }]);
-//         setInput("");
-//       }
-//     }
-//   };
-  
-//   const handleCheckboxChange = (index: number) => {
-//     setTasks(
-//       tasks.map((task, idx) =>
-//         idx === index ? { ...task, completed: !task.completed } : task
-//       )
-//     );
-//   };
+  return (
+    <div className="todoList">
+      {_.map(taskData.filteredTasks, (task, index) => (
+        <div className="check" key={task.task + index}>
+          <input
+            type="checkbox"
+            checked={task.completed}
+            onChange={() => toggleTask(index)}
+          />
+          <label>{task.task}</label>
+          <button onClick={() => deleteTask(index)}>X</button>
+        </div>
+      ))}
+    </div>
+  );
+}
 
-//   const selectAll = () => {
-//     const allSelected = tasks.every(task => task.completed);
-//     setTasks(tasks.map(task => ({ ...task, completed: !allSelected })));
-//   };
+function TodoFooter() {
+  const { taskData, setAll, setActive, setCompleted, clearCompleted } =
+    useTodoContext();
 
-//   const sortedTasks = tasks.filter(task => {
-//     if (filtered === "Active") {
-//       return !task.completed;
-//     }
-//     if (filtered === "Completed") {
-//       return task.completed;
-//     }
-//     return true;
-//   });
-//   return (
-//     <div className="App">
-//       <button type="button" className="btn select" onClick={selectAll}>
-//         {tasks.every(task => task.completed) ? "Deselect All" : "Select All"}
-//       </button>
-//       <input
-//         type="text"
-//         value={input}
-//         onChange={handleInputChange}
-//         onKeyDown={handleKeyPress}
-//         placeholder="What needs to be done?"
-//         className="head"
-//       />
+  return (
+    <div className="footer">
+      <h4 className="btn left">{`${taskData.tasks.length} items left!`}</h4>
+      <button className="btn all" onClick={() => setAll()}>
+        All
+      </button>
+      <button className="btn active" onClick={() => setActive()}>
+        Active
+      </button>
+      <button className="btn completed" onClick={() => setCompleted()}>
+        Completed
+      </button>
+      <button className="btn clear" onClick={() => clearCompleted()}>
+        Clear completed
+      </button>
+      <center className="info">
+        <p>Created by Arunkumar</p>
+      </center>
+    </div>
+  );
+}
 
-//       <div className="body">
-//         {sortedTasks.map((task, index) => (
-//           <div className="check" key={index}>
-//             <input
-//               type="checkbox"
-//               checked={task.completed}
-//               onChange={() => handleCheckboxChange(index)}
-//             />
-//             <label>
-//               {task.task}
-//             </label>
-//             <button onClick={() => setTasks(tasks.filter((item, idx) => idx !== index))}>X</button>
-//           </div>
-//         ))}
-//       </div>
+function Todo() {
+  return (
+    <div className="App">
+      <TodoHeader />
+      <TodoList />
+      <TodoFooter />
+    </div>
+  );
+}
 
-//       <button className="btn left">{`${tasks.length} items left!`}</button>
-//       <button className="btn all" onClick={() =>setFiltered("All")}>All</button>
-//       <button className="btn active" onClick={() =>setFiltered("Active")}>Active</button>
-//       <button className="btn completed" onClick={() =>setFiltered("Completed")}>Completed</button>
-//       <button
-//         className="btn clear"
-//         onClick={() => {
-//           const newTasks = tasks.filter(task => !task.completed);
-//           setTasks(newTasks);
-//         }}
-//       >
-//         Clear completed
-//       </button>
-//     </div>
-//   );
-// }
-
-// export default Todo;
+export default Todo;
