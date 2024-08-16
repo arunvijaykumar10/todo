@@ -1,7 +1,7 @@
 import React from "react";
 import "./Todo.css";
 import { useTodoContext } from "./TodoProvider";
-import _ from 'lodash';
+import _ from "lodash";
 
 function TodoHeader() {
   const { taskData, newTask, setInput, selectAll } = useTodoContext();
@@ -9,7 +9,7 @@ function TodoHeader() {
   return (
     <div>
       <button type="button" className="btn select" onClick={selectAll}>
-        {_.every(taskData.tasks, 'completed') ? 'Deselect All' : 'Select All'}
+        {_.every(taskData.tasks, "completed") ? "Deselect All" : "Select All"}
       </button>
       <input
         type="text"
@@ -24,7 +24,7 @@ function TodoHeader() {
 }
 
 function TodoList() {
-  const { taskData, toggleTask, dispatch } = useTodoContext();
+  const { taskData, toggleTask, deleteTask } = useTodoContext();
 
   return (
     <div className="todoList">
@@ -36,9 +36,7 @@ function TodoList() {
             onChange={() => toggleTask(index)}
           />
           <label>{task.task}</label>
-          <button onClick={() => dispatch({ type: "delete-task", payload: index })}>
-            X
-          </button>
+          <button onClick={() => deleteTask(index)}>X</button>
         </div>
       ))}
     </div>
@@ -46,26 +44,25 @@ function TodoList() {
 }
 
 function TodoFooter() {
-  const { taskData, dispatch } = useTodoContext();
+  const { taskData, setAll, setActive, setCompleted, clearCompleted } =
+    useTodoContext();
 
   return (
     <div className="footer">
       <h4 className="btn left">{`${taskData.tasks.length} items left!`}</h4>
-      
-      <button className="btn all" onClick={() => dispatch({ type: "set-filter", payload: "All" })}>
+      <button className="btn all" onClick={() => setAll()}>
         All
       </button>
-      <button className="btn active" onClick={() => dispatch({ type: "set-filter", payload: "Active" })}>
+      <button className="btn active" onClick={() => setActive()}>
         Active
       </button>
-      <button className="btn completed" onClick={() => dispatch({ type: "set-filter", payload: "Completed" })}>
+      <button className="btn completed" onClick={() => setCompleted()}>
         Completed
       </button>
-      <button className="btn clear" onClick={() => dispatch({ type: "clear-completed" })}>
+      <button className="btn clear" onClick={() => clearCompleted()}>
         Clear completed
       </button>
-      <center className='info'>
-        <p>Double-click to edit a todo</p>
+      <center className="info">
         <p>Created by Arunkumar</p>
       </center>
     </div>

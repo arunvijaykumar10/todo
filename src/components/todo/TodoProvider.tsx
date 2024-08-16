@@ -1,11 +1,11 @@
+import { produce } from "immer";
+import _ from "lodash";
 import React, {
-  useReducer,
   createContext,
   PropsWithChildren,
   useContext,
+  useReducer
 } from "react";
-import _ from 'lodash';
-import { produce } from "immer";
 
 interface Task {
   task: string;
@@ -13,12 +13,16 @@ interface Task {
 }
 
 interface TodoContexttype {
-  taskData: State; 
-  dispatch: React.Dispatch<Action>;
+  taskData: State;
   newTask: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   toggleTask: (index: number) => void;
   selectAll: () => void;
   setInput: React.ChangeEventHandler<HTMLInputElement>;
+  setAll: () => void;
+  setCompleted: () => void;
+  setActive: () => void;
+  clearCompleted: () => void;
+  deleteTask: (index: number) => void;
 }
 
 interface State {
@@ -50,7 +54,11 @@ const reducer = produce((state: State, action: Action) => {
       state.input = action.payload;
       break;
     case "add-task":
-      state.tasks = _.concat(state.tasks, { task: action.payload, completed: false });
+      state.tasks = _.concat(state.tasks, {
+        task: action.payload,
+        completed: false,
+      });
+      state.filteredTasks = state.tasks;
       state.input = "";
       break;
     case "toggle-task":
@@ -58,32 +66,44 @@ const reducer = produce((state: State, action: Action) => {
       if (taskToToggle) {
         taskToToggle.completed = !taskToToggle.completed;
       }
+      state.filteredTasks = state.tasks;
+
       break;
     case "delete-task":
-      state.tasks = _.remove(state.tasks, (task, index) => index !== action.payload);
+      state.tasks = _.remove(
+        state.tasks,
+        (task, index) => index !== action.payload
+      );
+      state.filteredTasks = state.tasks;
+
       break;
     case "select-all":
-      const allSelected = _.every(state.tasks, 'completed');
-      state.tasks = _.map(state.tasks, (task) => ({ ...task, completed: !allSelected }));
+      const allSelected = _.every(state.tasks, "completed");
+      state.tasks = _.map(state.tasks, (task) => ({
+        ...task,
+        completed: !allSelected,
+      }));
+      state.filteredTasks = state.tasks;
       break;
     case "set-filter":
-      state.filter = action.payload;
+      const filterType = action.payload;
+      state.filteredTasks = _.filter(state.tasks, (task) => {
+        if (filterType === "active") {
+          return !task.completed;
+        }
+        if (filterType === "completed") {
+          return task.completed;
+        }
+        return true;
+      });
       break;
     case "clear-completed":
       state.tasks = _.filter(state.tasks, (task) => !task.completed);
+      state.filteredTasks = state.tasks;
       break;
     default:
       break;
   }
-  state.filteredTasks = _.filter(state.tasks, (task) => {
-    if (state.filter === "Active") {
-      return !task.completed;
-    }
-    if (state.filter === "Completed") {
-      return task.completed;
-    }
-    return true;
-  });
 });
 
 const TodoContext = createContext<TodoContexttype | null>(null);
@@ -97,7 +117,7 @@ function TodoProvider({ children }: PropsWithChildren<{}>) {
 
   const newTask = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
-      const newTask = state.input.trim();
+      const newTask = _.trim(state.input);
       if (newTask !== "") {
         dispatch({ type: "add-task", payload: newTask });
       }
@@ -107,18 +127,37 @@ function TodoProvider({ children }: PropsWithChildren<{}>) {
   const toggleTask = (index: number) => {
     dispatch({ type: "toggle-task", payload: index });
   };
-
   const selectAll = () => {
     dispatch({ type: "select-all" });
   };
+  const setAll = () => {
+    dispatch({ type: "set-filter", payload: "all" });
+  };
+  const setActive = () => {
+    dispatch({ type: "set-filter", payload: "active" });
+  };
+
+  const setCompleted = () => {
+    dispatch({ type: "set-filter", payload: "completed" });
+  };
+  const clearCompleted = () => {
+    dispatch({ type: "clear-completed" });
+  };
+  const deleteTask = (index: number) => {
+    dispatch({ type: "delete-task", payload: index });
+  };
 
   const value = {
-    taskData: state, 
-    dispatch,
+    taskData: state,
+    setAll,
+    setActive,
+    setCompleted,
     newTask,
+    deleteTask,
     toggleTask,
     selectAll,
     setInput,
+    clearCompleted,
   };
 
   return <TodoContext.Provider value={value}>{children}</TodoContext.Provider>;
