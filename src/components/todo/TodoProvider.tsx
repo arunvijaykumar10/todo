@@ -4,6 +4,7 @@ import React, {
   PropsWithChildren,
   useContext,
 } from "react";
+import _ from 'lodash';
 import { produce } from "immer";
 
 interface Task {
@@ -14,17 +15,17 @@ interface Task {
 interface TodoContexttype {
   taskData: State; 
   dispatch: React.Dispatch<Action>;
-  handleKeyPress: (event: React.KeyboardEvent<HTMLInputElement>) => void;
-  handleCheckboxChange: (index: number) => void;
+  newTask: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  toggleTask: (index: number) => void;
   selectAll: () => void;
-  handleInputChange: React.ChangeEventHandler<HTMLInputElement>;
-  filteredTasks: Task[]; 
+  setInput: React.ChangeEventHandler<HTMLInputElement>;
 }
 
 interface State {
   tasks: Task[];
   filter: string;
   input: string;
+  filteredTasks: Task[];
 }
 
 type Action =
@@ -40,6 +41,7 @@ const initialState: State = {
   tasks: [],
   filter: "All",
   input: "",
+  filteredTasks: [],
 };
 
 const reducer = produce((state: State, action: Action) => {
@@ -48,58 +50,32 @@ const reducer = produce((state: State, action: Action) => {
       state.input = action.payload;
       break;
     case "add-task":
-      state.tasks.push({ task: action.payload, completed: false });
+      state.tasks = _.concat(state.tasks, { task: action.payload, completed: false });
       state.input = "";
       break;
     case "toggle-task":
-      state.tasks[action.payload].completed =
-        !state.tasks[action.payload].completed;
+      const taskToToggle = state.tasks[action.payload];
+      if (taskToToggle) {
+        taskToToggle.completed = !taskToToggle.completed;
+      }
       break;
     case "delete-task":
-      state.tasks.splice(action.payload, 1);
+      state.tasks = _.remove(state.tasks, (task, index) => index !== action.payload);
       break;
     case "select-all":
-      const allSelected = state.tasks.every((task) => task.completed);
-      state.tasks.forEach((task) => (task.completed = !allSelected));
+      const allSelected = _.every(state.tasks, 'completed');
+      state.tasks = _.map(state.tasks, (task) => ({ ...task, completed: !allSelected }));
       break;
     case "set-filter":
       state.filter = action.payload;
       break;
     case "clear-completed":
-      state.tasks = state.tasks.filter((task) => !task.completed);
+      state.tasks = _.filter(state.tasks, (task) => !task.completed);
       break;
     default:
       break;
   }
-});
-
-const TodoContext = createContext<TodoContexttype | null>(null);
-
-function TodoProvider({ children }: PropsWithChildren<{}>) {
-  const [state, dispatch] = useReducer(reducer, initialState);
-
-  const handleInputChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
-    dispatch({ type: "set-input", payload: event.target.value });
-  };
-
-  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      const trimmedInput = state.input.trim();
-      if (trimmedInput !== "") {
-        dispatch({ type: "add-task", payload: trimmedInput });
-      }
-    }
-  };
-
-  const handleCheckboxChange = (index: number) => {
-    dispatch({ type: "toggle-task", payload: index });
-  };
-
-  const selectAll = () => {
-    dispatch({ type: "select-all" });
-  };
-
-  const filteredTasks = state.tasks.filter((task) => {
+  state.filteredTasks = _.filter(state.tasks, (task) => {
     if (state.filter === "Active") {
       return !task.completed;
     }
@@ -108,15 +84,41 @@ function TodoProvider({ children }: PropsWithChildren<{}>) {
     }
     return true;
   });
+});
+
+const TodoContext = createContext<TodoContexttype | null>(null);
+
+function TodoProvider({ children }: PropsWithChildren<{}>) {
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  const setInput: React.ChangeEventHandler<HTMLInputElement> = (event) => {
+    dispatch({ type: "set-input", payload: event.target.value });
+  };
+
+  const newTask = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      const newTask = state.input.trim();
+      if (newTask !== "") {
+        dispatch({ type: "add-task", payload: newTask });
+      }
+    }
+  };
+
+  const toggleTask = (index: number) => {
+    dispatch({ type: "toggle-task", payload: index });
+  };
+
+  const selectAll = () => {
+    dispatch({ type: "select-all" });
+  };
 
   const value = {
     taskData: state, 
     dispatch,
-    handleKeyPress,
-    handleCheckboxChange,
+    newTask,
+    toggleTask,
     selectAll,
-    handleInputChange,
-    filteredTasks 
+    setInput,
   };
 
   return <TodoContext.Provider value={value}>{children}</TodoContext.Provider>;

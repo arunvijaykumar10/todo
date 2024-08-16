@@ -5,8 +5,8 @@ import TodoProvider from "./components/todo/TodoProvider";
 function App() {
   return (
     <div >
-      <div className="todos">
-        <h1>todos</h1>
+      <div >
+        <h1 className="todos">todos</h1>
         <TodoProvider>
           <Todo />
         </TodoProvider>
