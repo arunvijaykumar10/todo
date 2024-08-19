@@ -47,10 +47,12 @@ function TodoList() {
 
 function TodoFooter() {
   const { taskData, dispatch } = useTodoContext();
+  
+  const incompleteTasksCount = taskData.tasks.filter(task => !task.completed).length;
 
   return (
     <div className="footer">
-      <h4 className="btn left">{`${taskData.tasks.length} items left!`}</h4>
+      <h4 className="btn left">{`${incompleteTasksCount} items left!`}</h4>
       
       <button className="btn all" onClick={() => dispatch({ type: "set-filter", payload: "All" })}>
         All
@@ -65,8 +67,7 @@ function TodoFooter() {
         Clear completed
       </button>
       <center className='info'>
-        <p>Double-click to edit a todo</p>
-        <p>Created by Arunkumar</p>
+                <p>Created by Arunkumar</p>
       </center>
     </div>
   );

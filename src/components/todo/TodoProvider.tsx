@@ -12,7 +12,7 @@ interface Task {
   completed: boolean;
 }
 
-interface TodoContexttype {
+interface TodoContextType {
   taskData: State; 
   dispatch: React.Dispatch<Action>;
   newTask: (event: React.KeyboardEvent<HTMLInputElement>) => void;
@@ -52,41 +52,48 @@ const reducer = produce((state: State, action: Action) => {
     case "add-task":
       state.tasks = _.concat(state.tasks, { task: action.payload, completed: false });
       state.input = "";
+      state.filteredTasks = applyFilter(state.tasks, state.filter);
       break;
     case "toggle-task":
-      const taskToToggle = state.tasks[action.payload];
-      if (taskToToggle) {
-        taskToToggle.completed = !taskToToggle.completed;
+      if (state.tasks[action.payload]) {
+        state.tasks[action.payload].completed = !state.tasks[action.payload].completed;
       }
+      state.filteredTasks = applyFilter(state.tasks, state.filter);
       break;
     case "delete-task":
-      state.tasks = _.remove(state.tasks, (task, index) => index !== action.payload);
+      state.tasks = _.filter(state.tasks, (task, index) => index !== action.payload);
+      state.filteredTasks = applyFilter(state.tasks, state.filter);
       break;
     case "select-all":
       const allSelected = _.every(state.tasks, 'completed');
       state.tasks = _.map(state.tasks, (task) => ({ ...task, completed: !allSelected }));
+      state.filteredTasks = applyFilter(state.tasks, state.filter);
       break;
     case "set-filter":
       state.filter = action.payload;
+      state.filteredTasks = applyFilter(state.tasks, state.filter);
       break;
     case "clear-completed":
       state.tasks = _.filter(state.tasks, (task) => !task.completed);
+      state.filteredTasks = applyFilter(state.tasks, state.filter);
       break;
     default:
       break;
   }
-  state.filteredTasks = _.filter(state.tasks, (task) => {
-    if (state.filter === "Active") {
-      return !task.completed;
-    }
-    if (state.filter === "Completed") {
-      return task.completed;
-    }
-    return true;
-  });
 });
 
-const TodoContext = createContext<TodoContexttype | null>(null);
+const applyFilter = (tasks: Task[], filter: string): Task[] => {
+  switch (filter) {
+    case "Active":
+      return tasks.filter(task => !task.completed);
+    case "Completed":
+      return tasks.filter(task => task.completed);
+    default:
+      return tasks;
+  }
+};
+
+const TodoContext = createContext<TodoContextType | null>(null);
 
 function TodoProvider({ children }: PropsWithChildren<{}>) {
   const [state, dispatch] = useReducer(reducer, initialState);

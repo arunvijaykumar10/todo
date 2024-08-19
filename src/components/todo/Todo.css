@@ -111,3 +111,23 @@
   font:14px Helvetica Neue, Helvetica, Arial, sans-serif;
   
 }
+.check {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+
+.check input[type="checkbox"] {
+  margin-right: 20px;
+}
+
+
+.check label {
+  flex: 1;
+  }
+
+.check input[type="checkbox"]:checked + label {
+  text-decoration: line-through;
+  color:#b83f45;
+}
